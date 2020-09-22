@@ -1,0 +1,42 @@
+body{
+  background-color:rgb(0,2,7);
+  margin:0;
+  padding:0;
+  overflow: hidden;
+}
+
+#code{
+  position: absolute;
+  transform: translate(calc(50vw - 50%), calc(50vh - 50%));
+  padding:15px;
+  background-color:rgb(30,35,50);
+  color:rgb(200,200,200);
+  font-family: monospace;
+  font-size: 0.8rem;
+  border:0;
+  border-radius: 7px;
+}
+
+#output{
+  position: absolute;
+  width:60vw;
+  left:20vw;
+  top:87vh;
+  color:rgb(200,200,200);
+  font-family: monospace;
+  font-size: 0.7rem;
+}
+
+#compileBtn{
+  position: absolute;
+  left:45vw;
+  top:80vh;
+  width:10vw;
+  height:5vh;
+  background-color:rgb(100,200,120);
+  border:0;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  color:rgb(50,50,50);
+}
