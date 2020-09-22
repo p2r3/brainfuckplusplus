@@ -19,10 +19,14 @@ body{
 
 #output{
   position: absolute;
-  width:60vw;
-  left:20vw;
-  top:87vh;
+  top:90vh;
+  left:30vw;
+  width:40vw;
+  height:5vh;
   color:rgb(200,200,200);
+  background-color:rgb(10,15,20);
+  border-radius: 7px;
+  border:0;
   font-family: monospace;
   font-size: 0.7rem;
 }

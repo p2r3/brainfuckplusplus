@@ -6,9 +6,9 @@
     <script src="main.js" charset="utf-8"></script>
     <link rel="stylesheet" href="style.css">
   </head>
-  <body>
-    <textarea id="code" rows="30" cols="80"></textarea>
+  <body onload="helloworld()">
+    <textarea id="code" rows="30" cols="80" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
     <button id="compileBtn" type="button" onclick="compile()">Compile!</button>
-    <p id="output">Output: </p>
+    <input id="output"></input>
   </body>
 </html>
