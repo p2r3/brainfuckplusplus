@@ -118,7 +118,7 @@ function subtNumber(ind, num){
 
 function ifEquals(var1, var2){
 
-  indexBeforeIf = globalIndex;
+  indexBeforeIf = varAmount + 3;
 
   var int1 = parseInt(var1, 10), int2 = parseInt(var2, 10);
 
@@ -177,7 +177,7 @@ function compile(){
       output += "]";
       singleMove(varAmount, indexBeforeIf);
       goToIndex(indexBeforeIf);
-      
+
       continue;
 
     }
