@@ -35,6 +35,14 @@ function goToIndex(ind){
   }
 }
 
+function defineVar(name){
+  for(var i = 0; i < varAmount; i++){
+    if(varNames[i] == name) return(0);
+  }
+  varNames[varAmount] = name;
+  varAmount++;
+}
+
 function fullAddition(ind1, ind2, rez){
   singleAddition(ind1, varAmount + 1);
   singleAddition(ind2, varAmount + 1);
@@ -148,6 +156,20 @@ function brainfuckIf(var1, var2, operation){
 
 }
 
+function endIf(){
+
+  var bI = beforeIf[beforeIf.length - 1];
+
+  clear(varAmount);
+  singleMove(bI, varAmount);
+  output += "]";
+  singleMove(varAmount, bI);
+  goToIndex(bI);
+
+  beforeIf.pop();
+
+}
+
 var varNames = new Array();
 var varAmount = 0;
 var globalIndex = 0;
@@ -165,7 +187,37 @@ function compile(){
   var lines = getCode().split("\n");
   for(var i = 0; i < lines.length; i++){
 
+    while(lines[i].indexOf(" ") == 0) lines[i] = lines[i].substr(1);
+
     if(lines[i][0] == "/" && lines[i][1] == "/") continue;
+
+    if(lines[i].indexOf("while ") == 0) {
+
+      var split = lines[i].split(" ");
+
+      defineVar("_ARRAYBOOL");
+
+      addNumber(getIndex("_ARRAYBOOL"), 1);
+      output += "[[-]";
+
+      brainfuckIf(split[1], split[3], split[2]);
+
+      continue;
+
+    }
+
+    if(lines[i].indexOf("el") == 0){
+
+      addNumber(getIndex("_ARRAYBOOL"), 1);
+
+      endIf();
+
+      goToIndex(getIndex("_ARRAYBOOL"));
+      output += "]";
+
+      continue;
+
+    }
 
     if(lines[i].indexOf("if ") == 0) {
 
@@ -179,15 +231,7 @@ function compile(){
 
     if(lines[i].indexOf("fi") == 0) {
 
-      var bI = beforeIf[beforeIf.length - 1];
-
-      clear(varAmount);
-      singleMove(bI, varAmount);
-      output += "]";
-      singleMove(varAmount, bI);
-      goToIndex(bI);
-
-      beforeIf.pop();
+      endIf();
 
       continue;
 
