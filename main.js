@@ -116,9 +116,7 @@ function subtNumber(ind, num){
   for(var i = 0; i < num; i++) output+="-";
 }
 
-function ifEquals(var1, var2){
-
-  indexBeforeIf = varAmount + 3;
+function brainfuckIf(var1, var2, operation){
 
   var int1 = parseInt(var1, 10), int2 = parseInt(var2, 10);
 
@@ -136,15 +134,24 @@ function ifEquals(var1, var2){
     addNumber(varAmount + 2, int2);
   }
 
-  goToIndex(varAmount + 3);
-  output += "[-]+<<[->-<]>[>-<[-]]>[";
+  if(operation == "=="){
+    beforeIf[beforeIf.length] = varAmount + 3;
+    goToIndex(varAmount + 3);
+    output += "[-]+<<[->-<]>[>-<[-]]>[";
+  }
+
+  if(operation == "!="){
+    beforeIf[beforeIf.length] = varAmount + 2;
+    goToIndex(varAmount + 1);
+    output += "[->-<]>[[-]<";
+  }
 
 }
 
-var varNames = [];
+var varNames = new Array();
 var varAmount = 0;
 var globalIndex = 0;
-var indexBeforeIf = 0;
+var beforeIf = new Array();
 var output = "";
 
 function compile(){
@@ -152,7 +159,7 @@ function compile(){
   varNames = new Array();
   varAmount = 0;
   globalIndex = 0;
-  indexBeforeIf = 0;
+  beforeIf = new Array();
   output = "";
 
   var lines = getCode().split("\n");
@@ -164,7 +171,7 @@ function compile(){
 
       var split = lines[i].split(" ");
 
-      if(split[2] == "==") ifEquals(split[1], split[3]);
+      brainfuckIf(split[1], split[3], split[2]);
 
       continue;
 
@@ -172,11 +179,15 @@ function compile(){
 
     if(lines[i].indexOf("fi") == 0) {
 
+      var bI = beforeIf[beforeIf.length - 1];
+
       clear(varAmount);
-      singleMove(indexBeforeIf, varAmount);
+      singleMove(bI, varAmount);
       output += "]";
-      singleMove(varAmount, indexBeforeIf);
-      goToIndex(indexBeforeIf);
+      singleMove(varAmount, bI);
+      goToIndex(bI);
+
+      beforeIf.pop();
 
       continue;
 
