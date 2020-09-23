@@ -118,6 +118,8 @@ function subtNumber(ind, num){
 
 function ifEquals(var1, var2){
 
+  indexBeforeIf = globalIndex;
+
   var int1 = parseInt(var1, 10), int2 = parseInt(var2, 10);
 
   if(isNaN(var1) && isNaN(var2)){
@@ -135,17 +137,14 @@ function ifEquals(var1, var2){
   }
 
   goToIndex(varAmount + 3);
-  output += "+<<[->-<]>[>-<[-]]>[";
-
-  clear(varAmount + 1);
-  clear(varAmount + 2);
-  clear(varAmount + 3);
+  output += "[-]+<<[->-<]>[>-<[-]]>[";
 
 }
 
 var varNames = [];
 var varAmount = 0;
 var globalIndex = 0;
+var indexBeforeIf = 0;
 var output = "";
 
 function compile(){
@@ -153,6 +152,7 @@ function compile(){
   varNames = new Array();
   varAmount = 0;
   globalIndex = 0;
+  indexBeforeIf = 0;
   output = "";
 
   var lines = getCode().split("\n");
@@ -172,10 +172,12 @@ function compile(){
 
     if(lines[i].indexOf("fi") == 0) {
 
-      goToIndex(varAmount);
       clear(varAmount);
+      singleMove(indexBeforeIf, varAmount);
       output += "]";
-
+      singleMove(varAmount, indexBeforeIf);
+      goToIndex(indexBeforeIf);
+      
       continue;
 
     }
