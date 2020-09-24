@@ -2,7 +2,7 @@
 A simpler way of writing Brainfuck.
 
 ### What is it?
-This is something similar to a compiler for a very simple language I call "dusty", which is almost like a very strange and simple mix between Lua, Python and Bash.
+This is a compiler / interpreter for a very simple language I call "dusty", which is almost like a very strange and simple mix between Lua, Python and Bash.
 
 But the language isn't what's important. This "compiler" turns code written in this relatively basic and easy to read language into Brainfuck, an esoteric programming language with only 8 possible instructions.
 
@@ -14,7 +14,7 @@ No. Not at all. In fact, I prioritise functionality, expandability and readabili
 
 ### Where can I try it?
 
-[here](https://p2r3.github.io/brainfuckplusplus)
+[The github-hosted web version is available here](https://p2r3.github.io/brainfuckplusplus)
 
 # Short documentation for the dusty language
 
