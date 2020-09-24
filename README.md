@@ -41,6 +41,10 @@ The goal of this thing is to make it incredibly easy to write Brainfuck programs
 ### Is it optimised?
 No. Not at all. In fact, I prioritise functionality, expandability and readability of the compiler's code waaaaay over the optimisation of the output Brainfuck code. This doesn't mean that I don't optimise it at all, though. All I'm saying is that if optimising something sets back even one of these three points, I'm most likely not doing it. That said, I do often make regressions in optimisation in favor of cleaner compiler code.
 
+### Where can I try it?
+
+[here](https://p2r3.github.io/brainfuckplusplus)
+
 # Short documentation for the dusty language
 
 ## Introduction
