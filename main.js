@@ -22,7 +22,16 @@ function setOutput(val){
 
 function helloworld(){
   setCode("a = 5 - 3\n\nb = a + 48\n\nb >\n\n\"  Hello, world!");
-  setOutput("[-]++><[->>+<<]>>[-<<+>>>+<]>++++++++++++++++++++++++++++++++++++++++++++++++<<[-]>>[-<<+>>]<<.<[-]++++++++++++++++++++++++++++++++.++++++++++++++++++++++++++++++++++++++++.+++++++++++++++++++++++++++++.+++++++..+++.-------------------------------------------------------------------.------------.+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.--------.+++.------.--------.-------------------------------------------------------------------.[-]");
+  setOutput(">>[-]>[-]>[-]<<+++++>+++<<<[-]>>[->>+<<]>[-<<+>>]<<[->>+>-<<<]>>>[-<<<<+>>>>]<[-]>[-]>[-]<<<<<[->>+<<]>>[-<<+>>>+<]>>++++++++++++++++++++++++++++++++++++++++++++++++<<<[-]>>[->>+<<]>[->+<]>[-<<<<+>>>>]<<<<.>[-]++++++++++++++++++++++++++++++++.++++++++++++++++++++++++++++++++++++++++.+++++++++++++++++++++++++++++.+++++++..+++.-------------------------------------------------------------------.------------.+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.--------.+++.------.--------.-------------------------------------------------------------------.-----------------------.[-]");
+}
+
+function defineVar(name) {
+  for (var i = 0; i < varAmount; i++) {
+    if (varNames[i] == name) return (i);
+  }
+  varNames[varAmount] = name;
+  varAmount++;
+  return (varAmount - 1);
 }
 
 function getIndex(name){
@@ -45,89 +54,81 @@ function goToIndex(ind){
   }
 }
 
-function defineVar(name){
-  for(var i = 0; i < varAmount; i++){
-    if(varNames[i] == name) return(i);
-  }
-  varNames[varAmount] = name;
-  varAmount++;
-  return(varAmount - 1);
-}
-
-function fullAddition(ind1, ind2, rez){
-  singleAddition(ind1, varAmount + 1);
-  singleAddition(ind2, varAmount + 1);
-  clear(rez);
-  singleMove(varAmount + 1, rez);
-}
-
-function singleAddition(ind1, ind2){
-  singleMove(ind1, varAmount);
-  goToIndex(varAmount);
-  output+="[-";
+function move(ind1, ind2) {
   goToIndex(ind1);
-  output+="+";
+  output += "[-";
   goToIndex(ind2);
-  output+="+";
+  output += "+";
+  goToIndex(ind1);
+  output += "]";
+}
+
+function clone(ind1, ind2, reverse) {
+  if(reverse === undefined) reverse = false;
+  move(ind1, varAmount);
   goToIndex(varAmount);
-  output+="]";
-}
-
-function singleMove(ind1, ind2){
+  output += "[-";
   goToIndex(ind1);
-  output+="[-";
+  output += "+";
   goToIndex(ind2);
-  output+="+";
-  goToIndex(ind1);
-  output+="]";
+  if(reverse) output += "-";
+  else output += "+";
+  goToIndex(varAmount);
+  output += "]";
 }
 
-function clear(ind){
+function clear(ind) {
   goToIndex(ind);
-  output+="[-]";
+  output += "[-]";
 }
 
-function addNumber(ind, num){
+function add(var1, var2, rez){
+  
+  var int1 = parseInt(var1, 10);
+  var int2 = parseInt(var2, 10);
+  
+  clear(varAmount + 1);
+  clear(varAmount + 2);
+  clear(varAmount + 3);
+  
+  if (isNaN(var1)) clone(getIndex(var1), varAmount + 1);
+  else addNumber(varAmount + 1, int1);
+  if (isNaN(var2)) clone(getIndex(var2), varAmount + 2);
+  else addNumber(varAmount + 2, int2);
+  
+  clear(rez);
+  
+  move(varAmount + 1, varAmount + 3);
+  move(varAmount + 2, varAmount + 3);
+  move(varAmount + 3, rez);
+  
+}
+
+function addNumber(ind, num) {
   goToIndex(ind);
-  for(var i = 0; i < num; i++) output+="+";
+  for (var i = 0; i < num; i++) output += "+";
 }
 
-function fullAddNumber(ind, num, rez){
-  singleAddition(ind, varAmount + 1);
-  addNumber(varAmount + 1, num);
+function subtract(var1, var2, rez) {
+
+  var int1 = parseInt(var1, 10);
+  var int2 = parseInt(var2, 10);
+
+  clear(varAmount + 1);
+  clear(varAmount + 2);
+  clear(varAmount + 3);
+
+  if (isNaN(var1)) clone(getIndex(var1), varAmount + 1);
+  else addNumber(varAmount + 1, int1);
+  if (isNaN(var2)) clone(getIndex(var2), varAmount + 2);
+  else addNumber(varAmount + 2, int2);
+
   clear(rez);
-  singleMove(varAmount + 1, rez);
-}
 
-function fullSubtraction(ind1, ind2, rez){
-  singleAddition(ind1, varAmount + 1);
-  singleSubtraction(ind2, varAmount + 1);
-  clear(rez);
-  singleMove(varAmount + 1, rez);
-}
+  move(varAmount + 1, varAmount + 3);
+  clone(varAmount + 2, varAmount + 3, true);
+  move(varAmount + 3, rez);
 
-function singleSubtraction(ind1, ind2){
-  singleMove(ind1, varAmount);
-  goToIndex(varAmount);
-  output+="[-";
-  goToIndex(ind1);
-  output+="+";
-  goToIndex(ind2);
-  output+="-";
-  goToIndex(varAmount);
-  output+="]";
-}
-
-function fullSubtNumber(ind, num, rez, invert){
-  if(invert){
-    addNumber(varAmount + 1, num);
-    singleSubtraction(ind, varAmount + 1);
-  } else {
-    singleAddition(ind, varAmount + 1);
-    subtNumber(varAmount + 1, num);
-  }
-  clear(rez);
-  singleMove(varAmount + 1, rez);
 }
 
 function subtNumber(ind, num){
@@ -135,18 +136,47 @@ function subtNumber(ind, num){
   for(var i = 0; i < num; i++) output+="-";
 }
 
-function brainfuckIf(var1, var2, operation){
+function multiply(var1, var2, rez) {
+
+  var int1 = parseInt(var1, 10);
+  var int2 = parseInt(var2, 10);
+
+  clear(varAmount + 1);
+  clear(varAmount + 2);
+  clear(varAmount + 3);
+
+  if (isNaN(var1)) clone(getIndex(var1), varAmount + 1);
+  else addNumber(varAmount + 1, int1);
+  if (isNaN(var2)) clone(getIndex(var2), varAmount + 2);
+  else addNumber(varAmount + 2, int2);
+
+  clear(rez);
+  clone(varAmount + 2, varAmount + 3);
+
+  goToIndex(varAmount + 1);
+  output += "[-";
+  move(varAmount + 2, rez);
+  clone(varAmount + 3, varAmount + 2);
+  goToIndex(varAmount + 1);
+  output += "]";
+
+  clear(varAmount + 2);
+  clear(varAmount + 3);
+
+}
+
+function startIf(var1, var2, operation){
 
   var int1 = parseInt(var1, 10), int2 = parseInt(var2, 10);
 
   if(isNaN(var1) && isNaN(var2)){
-    singleAddition(getIndex(var1), varAmount + 1);
-    singleAddition(getIndex(var2), varAmount + 2);
+    clone(getIndex(var1), varAmount + 1);
+    clone(getIndex(var2), varAmount + 2);
   } else if(isNaN(var2)){
     addNumber(varAmount + 1, int1);
-    singleAddition(getIndex(var2), varAmount + 2);
+    clone(getIndex(var2), varAmount + 2);
   } else if(isNaN(var1)){
-    singleAddition(getIndex(var1), varAmount + 1);
+    clone(getIndex(var1), varAmount + 1);
     addNumber(varAmount + 2, int2);
   } else {
     addNumber(varAmount + 1, int1);
@@ -172,42 +202,13 @@ function endIf(){
   var bI = beforeIf[beforeIf.length - 1];
 
   clear(varAmount);
-  singleMove(bI, varAmount);
+  move(bI, varAmount);
   output += "]";
-  singleMove(varAmount, bI);
+  move(varAmount, bI);
   goToIndex(bI);
 
   beforeIf.pop();
 
-}
-
-function multiply(var1, var2, rez){
-  
-  var int1 = parseInt(var1, 10);
-  var int2 = parseInt(var2, 10);
-  
-  clear(varAmount + 1);
-  clear(varAmount + 2);
-  clear(varAmount + 3);
-  
-  if (isNaN(var1)) singleAddition(getIndex(var1), varAmount + 1);
-  else addNumber(varAmount + 1, int1);  
-  if (isNaN(var2)) singleAddition(getIndex(var2), varAmount + 2);
-  else addNumber(varAmount + 2, int2);
-  
-  clear(rez);
-  singleAddition(varAmount + 2, varAmount + 3);
-  
-  goToIndex(varAmount + 1);
-  output += "[-";
-  singleMove(varAmount + 2, rez);
-  singleAddition(varAmount + 3, varAmount + 2);
-  goToIndex(varAmount + 1);
-  output += "]";
-  
-  clear(varAmount + 2);
-  clear(varAmount + 3);
-  
 }
 
 var varNames = new Array();
@@ -240,7 +241,7 @@ function compile(){
       addNumber(getIndex("_ARRAYBOOL"), 1);
       output += "[[-]";
 
-      brainfuckIf(split[1], split[3], split[2]);
+      startIf(split[1], split[3], split[2]);
 
       continue;
 
@@ -263,7 +264,7 @@ function compile(){
 
       var split = lines[i].split(" ");
 
-      brainfuckIf(split[1], split[3], split[2]);
+      startIf(split[1], split[3], split[2]);
 
       continue;
 
@@ -317,7 +318,7 @@ function compile(){
           addNumber(currentIndex, parseInt(split[2],10));
         } else if (split[2] != split[0]) {
           clear(currentIndex);
-          singleAddition(getIndex(split[2]), currentIndex);
+          clone(getIndex(split[2]), currentIndex);
         }
 
       } else if (split.length == 5) {
@@ -326,25 +327,9 @@ function compile(){
         if(isNaN(split[4])) var ind2 = getIndex(split[4]);
         var num1 = parseInt(split[2], 10), num2 = parseInt(split[4], 10);
 
-        if(split[3] == "+") {
-          if(isNaN(split[2]) && isNaN(split[4])) fullAddition(ind1, ind2, currentIndex);
-          else if(isNaN(split[2])) fullAddNumber(ind1, num2, currentIndex);
-          else if(isNaN(split[4])) fullAddNumber(ind2, num1, currentIndex);
-          else{
-            clear(currentIndex);
-            addNumber(currentIndex, num1 + num2);
-          }
-        }
+        if(split[3] == "+") add(split[2], split[4], currentIndex);
 
-        if(split[3] == "-") {
-          if(isNaN(split[2]) && isNaN(split[4])) fullSubtraction(ind1, ind2, currentIndex);
-          else if (isNaN(split[2])) fullSubtNumber(ind1, num2, currentIndex, false);
-          else if (isNaN(split[4])) fullSubtNumber(ind2, num1, currentIndex, true);
-          else {
-            clear(currentIndex);
-            addNumber(currentIndex, num1 - num2);
-          }
-        }
+        if(split[3] == "-") subtract(split[2], split[4], currentIndex)
         
         if(split[3] == "*") multiply(split[2], split[4], currentIndex);
 
