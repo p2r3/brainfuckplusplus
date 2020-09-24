@@ -25,6 +25,25 @@ function helloworld(){
   setOutput(">>[-]>[-]>[-]<<+++++>+++<<<[-]>>[->>+<<]>[-<<+>>]<<[->>+>-<<<]>>>[-<<<<+>>>>]<[-]>[-]>[-]<<<<<[->>+<<]>>[-<<+>>>+<]>>++++++++++++++++++++++++++++++++++++++++++++++++<<<[-]>>[->>+<<]>[->+<]>[-<<<<+>>>>]<<<<.>[-]++++++++++++++++++++++++++++++++.++++++++++++++++++++++++++++++++++++++++.+++++++++++++++++++++++++++++.+++++++..+++.-------------------------------------------------------------------.------------.+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.--------.+++.------.--------.-------------------------------------------------------------------.-----------------------.[-]");
 }
 
+function error(val, showLine){
+
+  if(showLine === undefined){
+    showLine = true;
+  }
+
+  if(!suppressErrors){
+
+    var errorLine = "";
+    if(showLine) errorLine = " on line " + currentLine;
+
+    alert("Error" + errorLine + ": " + val);
+    console.error("Line " + currentLine + " - " + val);
+    suppressErrors = true;
+
+  }
+
+}
+
 function defineVar(name) {
   for (var i = 0; i < varAmount; i++) {
     if (varNames[i] == name) return (i);
@@ -38,11 +57,15 @@ function getIndex(name){
   for(var i = 0; i < varAmount; i++){
     if(name == varNames[i]) return(i);
   }
-  alert("Error: Can't get index of " + name + " because it is undefined.");
+  error(name + " is undefined.");
   return(undefined);
 }
 
 function goToIndex(ind){
+  if(isNaN(ind)){
+    error(ind + " is not a valid pointer position.");
+    return 1;
+  }
   while(globalIndex != ind){
     if(globalIndex < ind){
       globalIndex++;
@@ -83,25 +106,25 @@ function clear(ind) {
 }
 
 function add(var1, var2, rez){
-  
+
   var int1 = parseInt(var1, 10);
   var int2 = parseInt(var2, 10);
-  
+
   clear(varAmount + 1);
   clear(varAmount + 2);
   clear(varAmount + 3);
-  
+
   if (isNaN(var1)) clone(getIndex(var1), varAmount + 1);
   else addNumber(varAmount + 1, int1);
   if (isNaN(var2)) clone(getIndex(var2), varAmount + 2);
   else addNumber(varAmount + 2, int2);
-  
+
   clear(rez);
-  
+
   move(varAmount + 1, varAmount + 3);
   move(varAmount + 2, varAmount + 3);
   move(varAmount + 3, rez);
-  
+
 }
 
 function addNumber(ind, num) {
@@ -211,11 +234,63 @@ function endIf(){
 
 }
 
+function startWhile(var1, var2, operation){
+
+  defineVar("_ARRAYBOOL");
+
+  addNumber(getIndex("_ARRAYBOOL"), 1);
+  output += "[[-]";
+
+  startIf(var1, var2, operation);
+
+  openWhileLoops++;
+
+}
+
+function endWhile(){
+
+  addNumber(getIndex("_ARRAYBOOL"), 1);
+
+  endIf();
+
+  goToIndex(getIndex("_ARRAYBOOL"));
+  output += "]";
+
+  openWhileLoops--;
+
+}
+
+function echo(string){
+
+  clear(varAmount);
+
+  var tempPointer = 0;
+
+  for(var j = 1; j < string.length; j++) {
+    while(tempPointer != string.charCodeAt(j)){
+      if(tempPointer < string.charCodeAt(j)){
+        tempPointer++;
+        output += "+";
+      } else {
+        tempPointer--;
+        output += "-";
+      }
+    }
+    output += ".";
+  }
+
+  clear(varAmount);
+
+}
+
 var varNames = new Array();
 var varAmount = 0;
 var globalIndex = 0;
 var beforeIf = new Array();
 var output = "";
+var suppressErrors = false;
+var currentLine = 0;
+var openWhileLoops = 0;
 
 function compile(){
 
@@ -224,9 +299,14 @@ function compile(){
   globalIndex = 0;
   beforeIf = new Array();
   output = "";
+  suppressErrors = false;
+  openWhileLoops = 0;
 
   var lines = getCode().split("\n");
   for(var i = 0; i < lines.length; i++){
+
+    currentLine = i + 1;
+    var line = lines[i].replace(/ /g, "");
 
     while(lines[i].indexOf(" ") == 0) lines[i] = lines[i].substr(1);
 
@@ -234,38 +314,37 @@ function compile(){
 
     if(lines[i].indexOf("while ") == 0) {
 
-      var split = lines[i].split(" ");
+      var operator = "";
 
-      defineVar("_ARRAYBOOL");
+      if(line.indexOf("==") > -1) operator = "==";
+      if(line.indexOf("!=") > -1) operator = "!=";
 
-      addNumber(getIndex("_ARRAYBOOL"), 1);
-      output += "[[-]";
+      var var1 = line.substr(5).split(operator)[0];
+      var var2 = line.split(operator)[1];
 
-      startIf(split[1], split[3], split[2]);
-
+      startWhile(var1, var2, operator);
       continue;
 
     }
 
     if(lines[i].indexOf("el") == 0){
 
-      addNumber(getIndex("_ARRAYBOOL"), 1);
-
-      endIf();
-
-      goToIndex(getIndex("_ARRAYBOOL"));
-      output += "]";
-
+      endWhile();
       continue;
 
     }
 
     if(lines[i].indexOf("if ") == 0) {
 
-      var split = lines[i].split(" ");
+      var operator = "";
 
-      startIf(split[1], split[3], split[2]);
+      if(line.indexOf("==") > -1) operator = "==";
+      if(line.indexOf("!=") > -1) operator = "!=";
 
+      var var1 = line.substr(2).split(operator)[0];
+      var var2 = line.split(operator)[1];
+
+      startIf(var1, var2, operator);
       continue;
 
     }
@@ -273,87 +352,74 @@ function compile(){
     if(lines[i].indexOf("fi") == 0) {
 
       endIf();
-
       continue;
 
     }
 
-    if(lines[i][0] == "\"" && lines[i][1] == " ") {
+    if(lines[i][0] == "\"" || lines[i][0] == "\'") {
 
-      var temp = 0;
-      lines[i] += "\n";
+      var string = lines[i];
+      if(lines[i][0] == "\"") string += "\n";
+      echo(string);
+      continue;
 
-      goToIndex(varAmount);
-      clear(varAmount);
+    }
 
-      for(var j = 2; j < lines[i].length; j++) {
-        while(temp != lines[i].charCodeAt(j)){
-          if(temp < lines[i].charCodeAt(j)){
-            temp++;
-            output += "+";
-          } else {
-            temp--;
-            output += "-";
-          }
+    if(lines[i].indexOf("=") > -1){
+
+      var currentName = line.substr(0, line.indexOf("="));
+      var currentIndex = defineVar(currentName);
+      var operator = "";
+
+      if(line.indexOf("+") > -1) operator = "+";
+      if(line.indexOf("-") > -1) operator = "-";
+      if(line.indexOf("*") > -1) operator = "*";
+      if(line.indexOf("/") > -1) operator = "/";
+
+      if(operator == ""){
+
+        var var1 = line.split("=")[1];
+
+        if (!isNaN(var1)) {
+          clear(currentIndex);
+          addNumber(currentIndex, parseInt(var1,10));
+        } else if (var1 != currentName) {
+          clear(currentIndex);
+          clone(getIndex(var1), currentIndex);
         }
-        output += ".";
+
+      } else {
+
+        var var1 = line.split(operator)[0].split("=")[1];
+        var var2 = line.split(operator)[1];
+
+        if(isNaN(var1)) var ind1 = getIndex(var1);
+        if(isNaN(var2)) var ind2 = getIndex(var2);
+
+        if(operator == "+") add(var1, var2, currentIndex);
+        if(operator == "-") subtract(var1, var2, currentIndex)
+        if(operator == "*") multiply(var1, var2, currentIndex);
+
       }
 
-      clear(varAmount);
-
       continue;
 
     }
 
-    if(lines[i].indexOf(" = ") > -1){
+    if(lines[i].indexOf(">") > -1){
 
-      var split = lines[i].split(" ");
-      var currentName = lines[i].substr(0, lines[i].indexOf(" = "));
-      var currentIndex = defineVar(currentName);
-
-      if(split.length == 3){
-
-        if (!isNaN(split[2])) {
-          clear(currentIndex);
-          addNumber(currentIndex, parseInt(split[2],10));
-        } else if (split[2] != split[0]) {
-          clear(currentIndex);
-          clone(getIndex(split[2]), currentIndex);
-        }
-
-      } else if (split.length == 5) {
-
-        if(isNaN(split[2])) var ind1 = getIndex(split[2]);
-        if(isNaN(split[4])) var ind2 = getIndex(split[4]);
-        var num1 = parseInt(split[2], 10), num2 = parseInt(split[4], 10);
-
-        if(split[3] == "+") add(split[2], split[4], currentIndex);
-
-        if(split[3] == "-") subtract(split[2], split[4], currentIndex)
-        
-        if(split[3] == "*") multiply(split[2], split[4], currentIndex);
-
-      } else alert("Error: Too many operations when defining " + currentName + ".");
-
-      continue;
-
-    }
-
-    if(lines[i].indexOf(" >") > -1){
-
-      var currentIndex = getIndex(lines[i].substr(0, lines[i].indexOf(" >")));
+      var currentIndex = getIndex(line.substr(0, line.indexOf(">")));
 
       goToIndex(currentIndex);
-
       output += ".";
 
       continue;
 
     }
 
-    if(lines[i].indexOf(" <") > -1){
+    if(lines[i].indexOf("<") > -1){
 
-      var currentName = lines[i].substr(0, lines[i].indexOf(" <"));
+      var currentName = line.substr(0, line.indexOf("<"));
       var currentIndex = defineVar(currentName);
 
       goToIndex(currentIndex);
@@ -365,6 +431,9 @@ function compile(){
 
   }
 
+  if(openWhileLoops != 0) error("Unclosed while loop detected.", false);
+
+  if(suppressErrors) output = "  Compilation error";
   setOutput(output);
 
 }
