@@ -7,6 +7,16 @@ function setCode(val){
 }
 
 function setOutput(val){
+  var prevLen = 0;
+  while (prevLen != val.length){
+    prevLen = val.length;
+    val = val.replace(/<>/g, "");
+    val = val.replace(/></g, "");
+    val = val.replace(/\+-/g, "");
+    val = val.replace(/-\+/g, "");
+    val = val.replace(/\[\]/g, "");
+    val = val.replace(/\[-\]\[-\]/g, "");
+  }
   return document.getElementById("output").value = val;
 }
 
@@ -37,10 +47,11 @@ function goToIndex(ind){
 
 function defineVar(name){
   for(var i = 0; i < varAmount; i++){
-    if(varNames[i] == name) return(0);
+    if(varNames[i] == name) return(i);
   }
   varNames[varAmount] = name;
   varAmount++;
+  return(varAmount - 1);
 }
 
 function fullAddition(ind1, ind2, rez){
@@ -170,6 +181,35 @@ function endIf(){
 
 }
 
+function multiply(var1, var2, rez){
+  
+  var int1 = parseInt(var1, 10);
+  var int2 = parseInt(var2, 10);
+  
+  clear(varAmount + 1);
+  clear(varAmount + 2);
+  clear(varAmount + 3);
+  
+  if (isNaN(var1)) singleAddition(getIndex(var1), varAmount + 1);
+  else addNumber(varAmount + 1, int1);  
+  if (isNaN(var2)) singleAddition(getIndex(var2), varAmount + 2);
+  else addNumber(varAmount + 2, int2);
+  
+  clear(rez);
+  singleAddition(varAmount + 2, varAmount + 3);
+  
+  goToIndex(varAmount + 1);
+  output += "[-";
+  singleMove(varAmount + 2, rez);
+  singleAddition(varAmount + 3, varAmount + 2);
+  goToIndex(varAmount + 1);
+  output += "]";
+  
+  clear(varAmount + 2);
+  clear(varAmount + 3);
+  
+}
+
 var varNames = new Array();
 var varAmount = 0;
 var globalIndex = 0;
@@ -267,22 +307,8 @@ function compile(){
     if(lines[i].indexOf(" = ") > -1){
 
       var split = lines[i].split(" ");
-      var currentIndex = varAmount;
       var currentName = lines[i].substr(0, lines[i].indexOf(" = "));
-
-      for(var j = 0; j < varAmount; j++){
-        if(currentName == varNames[j]){
-          currentIndex = j;
-          break;
-        }
-      }
-
-      goToIndex(currentIndex);
-
-      if(currentIndex == varAmount){
-        varNames[currentIndex] = currentName;
-        varAmount++;
-      }
+      var currentIndex = defineVar(currentName);
 
       if(split.length == 3){
 
@@ -296,27 +322,31 @@ function compile(){
 
       } else if (split.length == 5) {
 
+        if(isNaN(split[2])) var ind1 = getIndex(split[2]);
+        if(isNaN(split[4])) var ind2 = getIndex(split[4]);
+        var num1 = parseInt(split[2], 10), num2 = parseInt(split[4], 10);
+
         if(split[3] == "+") {
-          if(isNaN(split[2]) && isNaN(split[4])) fullAddition(getIndex(split[2]), getIndex(split[4]), currentIndex);
-          else if(isNaN(split[2])) fullAddNumber(getIndex(split[2]), parseInt(split[4], 10), currentIndex);
-          else if(isNaN(split[4])) fullAddNumber(getIndex(split[4]), parseInt(split[2], 10), currentIndex);
+          if(isNaN(split[2]) && isNaN(split[4])) fullAddition(ind1, ind2, currentIndex);
+          else if(isNaN(split[2])) fullAddNumber(ind1, num2, currentIndex);
+          else if(isNaN(split[4])) fullAddNumber(ind2, num1, currentIndex);
           else{
             clear(currentIndex);
-            addNumber(currentIndex, parseInt(split[2], 10) + parseInt(split[4], 10));
+            addNumber(currentIndex, num1 + num2);
           }
         }
 
         if(split[3] == "-") {
-          if(isNaN(split[2]) && isNaN(split[4])) fullSubtraction(getIndex(split[2]), getIndex(split[4]), currentIndex);
-          else if (isNaN(split[2])) fullSubtNumber(getIndex(split[2]), parseInt(split[4], 10), currentIndex, false);
-          else if (isNaN(split[4])) fullSubtNumber(getIndex(split[4]), parseInt(split[2], 10), currentIndex, true);
+          if(isNaN(split[2]) && isNaN(split[4])) fullSubtraction(ind1, ind2, currentIndex);
+          else if (isNaN(split[2])) fullSubtNumber(ind1, num2, currentIndex, false);
+          else if (isNaN(split[4])) fullSubtNumber(ind2, num1, currentIndex, true);
           else {
             clear(currentIndex);
-            var temp = parseInt(split[2], 10) - parseInt(split[4], 10);
-            if(temp < 0) console.warn("Warning: Value of " + currentName + " is negative");
-            addNumber(currentIndex, temp);
+            addNumber(currentIndex, num1 - num2);
           }
         }
+        
+        if(split[3] == "*") multiply(split[2], split[4], currentIndex);
 
       } else alert("Error: Too many operations when defining " + currentName + ".");
 
@@ -339,19 +369,7 @@ function compile(){
     if(lines[i].indexOf(" <") > -1){
 
       var currentName = lines[i].substr(0, lines[i].indexOf(" <"));
-      var currentIndex = varAmount;
-
-      for (var j = 0; j < varAmount; j++) {
-        if (currentName == varNames[j]) {
-          currentIndex = j;
-          break;
-        }
-      }
-
-      if(currentIndex == varAmount){
-        varNames[currentIndex] = currentName;
-        varAmount++;
-      }
+      var currentIndex = defineVar(currentName);
 
       goToIndex(currentIndex);
       output += ",";
