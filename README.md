@@ -108,3 +108,11 @@ The syntax for while loops is `while` followed by the values to compare and an o
 Notes:
 * As of now, the space between the operator and the values being compared is mandatory in BrainFuck++.
 * BrainFuck++ currently doesn't support arithmetic operations in the head of while loops.
+
+### Text output
+To output a line of text, use `" ` followed by the text to output.
+```
+  " Hello World!
+```
+
+Note: The space between `"` and the text is mandatory.
