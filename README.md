@@ -15,6 +15,7 @@ No. Not at all. In fact, I prioritise functionality, expandability and readabili
 ### Where can I try it?
 
 [The github-hosted web version is available here](https://p2r3.github.io/brainfuckplusplus)
+(Currently desktop only, responsiveness is definitely not my priority right now.)
 
 # Short documentation for the dusty language
 
