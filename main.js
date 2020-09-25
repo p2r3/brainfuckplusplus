@@ -54,6 +54,9 @@ function defineVar(name) {
 }
 
 function getIndex(name){
+  if(name == "true" || name == "false"){
+    return(defineVar(name));
+  }
   for(var i = 0; i < varAmount; i++){
     if(name == varNames[i]) return(i);
   }
@@ -87,15 +90,14 @@ function move(ind1, ind2) {
 }
 
 function clone(ind1, ind2, reverse) {
-  if(reverse === undefined) reverse = false;
   move(ind1, varAmount);
   goToIndex(varAmount);
   output += "[-";
   goToIndex(ind1);
   output += "+";
   goToIndex(ind2);
-  if(reverse) output += "-";
-  else output += "+";
+  if(reverse === true) output += "+";
+  else output += "-";
   goToIndex(varAmount);
   output += "]";
 }
@@ -186,6 +188,45 @@ function multiply(var1, var2, rez) {
   clear(varAmount + 2);
   clear(varAmount + 3);
 
+}
+
+function divide(var1, var2, rez){
+
+  var int1 = parseInt(var1, 10);
+  var int2 = parseInt(var2, 10);
+  
+  clear(varAmount + 1);
+  clear(varAmount + 2);
+  clear(varAmount + 3);
+  clear(varAmount + 4);
+  
+  if (isNaN(var1)) clone(getIndex(var1), varAmount + 1);
+  else addNumber(varAmount + 1, int1);
+  if (isNaN(var2)) clone(getIndex(var2), varAmount + 2);
+  else addNumber(varAmount + 2, int2);
+  
+  clear(rez);
+  clone(varAmount + 2, varAmount + 3);
+  
+  goToIndex(varAmount + 1);
+  output += "["
+  goToIndex(varAmount + 2);
+  output += "["
+  goToIndex(varAmount + 1);
+  output += "[-";
+  move(varAmount + 1, varAmount + 4);
+  output += "]";
+  move(varAmount + 4, varAmount + 1);
+  goToIndex(varAmount + 2);
+  output += "-]";
+  addNumber(rez, 1);
+  clone(varAmount + 3, varAmount + 2);
+  goToIndex(varAmount + 1);
+  output += "]";
+  
+  clear(varAmount + 2);
+  clear(varAmount + 3);
+  
 }
 
 function startIf(var1, var2, operation){
@@ -306,7 +347,7 @@ function compile(){
   for(var i = 0; i < lines.length; i++){
 
     currentLine = i + 1;
-    var line = lines[i].replace(/ /g, "");
+    var line = lines[i].replace(/ /g, "").replace(/;/g, "");
 
     while(lines[i].indexOf(" ") == 0) lines[i] = lines[i].substr(1);
 
@@ -399,6 +440,7 @@ function compile(){
         if(operator == "+") add(var1, var2, currentIndex);
         if(operator == "-") subtract(var1, var2, currentIndex)
         if(operator == "*") multiply(var1, var2, currentIndex);
+        if(operator == "/") divide(var1, var2, currentIndex);
 
       }
 
