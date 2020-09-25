@@ -466,6 +466,28 @@ function compile(){
 
     }
 
+    if(lines[i].indexOf("*=") > -1){
+
+      var currentName = line.split("*=")[0];
+      var currentIndex = defineVar(currentName);
+      var toMultiply = line.split("*=")[1];
+      multiply(currentName, toMultiply, currentIndex);
+
+      continue;
+
+    }
+
+    if(lines[i].indexOf("/=") > -1){
+
+      var currentName = line.split("/=")[0];
+      var currentIndex = defineVar(currentName);
+      var divideBy = line.split("/=")[1];
+      divide(currentName, divideBy, currentIndex);
+
+      continue;
+
+    }
+
     if(lines[i].indexOf("=") > -1){
 
       var currentName = line.split("=")[0];
