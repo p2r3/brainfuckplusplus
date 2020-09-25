@@ -15,7 +15,7 @@ function setOutput(val){
     val = val.replace(/\+-/g, "");
     val = val.replace(/-\+/g, "");
     val = val.replace(/\[\]/g, "");
-    val = val.replace(/\[-\]\[-\]/g, "");
+    val = val.replace(/\[-\]\[-\]/g, "[-]");
   }
   return document.getElementById("output").value = val;
 }
@@ -96,10 +96,16 @@ function clone(ind1, ind2, reverse) {
   goToIndex(ind1);
   output += "+";
   goToIndex(ind2);
-  if(reverse === true) output += "+";
-  else output += "-";
+  if(reverse === true) output += "-";
+  else output += "+";
   goToIndex(varAmount);
   output += "]";
+}
+
+function swap(ind1, ind2){
+  move(ind1, varAmount);
+  move(ind2, ind1);
+  move(varAmount, ind2);
 }
 
 function clear(ind) {
@@ -154,6 +160,8 @@ function subtract(var1, var2, rez) {
   clone(varAmount + 2, varAmount + 3, true);
   move(varAmount + 3, rez);
 
+  clear(varAmount + 2);
+
 }
 
 function subtNumber(ind, num){
@@ -194,26 +202,28 @@ function divide(var1, var2, rez){
 
   var int1 = parseInt(var1, 10);
   var int2 = parseInt(var2, 10);
-  
+
   clear(varAmount + 1);
   clear(varAmount + 2);
   clear(varAmount + 3);
   clear(varAmount + 4);
-  
+
   if (isNaN(var1)) clone(getIndex(var1), varAmount + 1);
   else addNumber(varAmount + 1, int1);
   if (isNaN(var2)) clone(getIndex(var2), varAmount + 2);
   else addNumber(varAmount + 2, int2);
-  
+
   clear(rez);
   clone(varAmount + 2, varAmount + 3);
-  
+
   goToIndex(varAmount + 1);
   output += "["
   goToIndex(varAmount + 2);
   output += "["
+  addNumber(varAmount + 5, 1);
   goToIndex(varAmount + 1);
   output += "[-";
+  clear(varAmount + 5);
   move(varAmount + 1, varAmount + 4);
   output += "]";
   move(varAmount + 4, varAmount + 1);
@@ -223,10 +233,15 @@ function divide(var1, var2, rez){
   clone(varAmount + 3, varAmount + 2);
   goToIndex(varAmount + 1);
   output += "]";
-  
+  goToIndex(varAmount + 5);
+  output += "[";
+  subtNumber(rez, 1);
+  clear(varAmount + 5);
+  output += "]";
+
   clear(varAmount + 2);
   clear(varAmount + 3);
-  
+
 }
 
 function startIf(var1, var2, operation){
@@ -249,14 +264,35 @@ function startIf(var1, var2, operation){
 
   if(operation == "=="){
     beforeIf[beforeIf.length] = varAmount + 3;
+
     goToIndex(varAmount + 3);
     output += "[-]+<<[->-<]>[>-<[-]]>[";
   }
 
   if(operation == "!="){
     beforeIf[beforeIf.length] = varAmount + 2;
+
     goToIndex(varAmount + 1);
     output += "[->-<]>[[-]<";
+  }
+
+  if(operation == ">" || operation == "<"){
+    beforeIf[beforeIf.length] = varAmount + 1;
+    clear(varAmount + 3);
+
+    if(operation == "<") swap(varAmount + 1, varAmount + 2);
+
+    goToIndex(varAmount + 2);
+    output += "[";
+    goToIndex(varAmount + 1);
+    output += "[-";
+    move(varAmount + 1, varAmount + 3);
+    output += "]";
+    move(varAmount + 3, varAmount + 1);
+    goToIndex(varAmount + 2);
+    output += "-]";
+    goToIndex(varAmount + 1);
+    output += "[[-]";
   }
 
 }
@@ -381,6 +417,8 @@ function compile(){
 
       if(line.indexOf("==") > -1) operator = "==";
       if(line.indexOf("!=") > -1) operator = "!=";
+      if(line.indexOf("<") > -1) operator = "<";
+      if(line.indexOf(">") > -1) operator = ">";
 
       var var1 = line.substr(2).split(operator)[0];
       var var2 = line.split(operator)[1];
@@ -406,9 +444,31 @@ function compile(){
 
     }
 
+    if(lines[i].indexOf("+=") > -1){
+
+      var currentName = line.split("+=")[0];
+      var currentIndex = defineVar(currentName);
+      var toAdd = line.split("+=")[1];
+      add(currentName, toAdd, currentIndex);
+
+      continue;
+
+    }
+
+    if(lines[i].indexOf("-=") > -1){
+
+      var currentName = line.split("-=")[0];
+      var currentIndex = defineVar(currentName);
+      var toSubtract = line.split("-=")[1];
+      subtract(currentName, toSubtract, currentIndex);
+
+      continue;
+
+    }
+
     if(lines[i].indexOf("=") > -1){
 
-      var currentName = line.substr(0, line.indexOf("="));
+      var currentName = line.split("=")[0];
       var currentIndex = defineVar(currentName);
       var operator = "";
 
