@@ -54,6 +54,22 @@ Note:
 * The right side of the shorthand cannot be an arithmetic operation itself.
 * These shorthands cannot have a space between the operator and equals sign.
 
+### Booleans
+Setting a variable to true or false is the same as setting it to 1 or 0, respectively. The only difference is that the code might be easier to read in some cases. Please note, however, that using true or false can noticeably bloat the output code in BrainFuck++, especially in larger programs.
+```
+  //this:
+  yep = true
+  nope = false
+  //is the same as this:
+  yep = 1
+  nope = 0
+```
+Since BrainFuck++ actually stores booleans as simple variables, you can even overwrite them if necessary:
+```
+  true = 200
+  false = 50
+```
+
 ### Input
 To set the value of a variable from user input, use the variable name followed by the less than sign:
 ```

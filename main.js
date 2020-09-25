@@ -50,13 +50,12 @@ function defineVar(name) {
   }
   varNames[varAmount] = name;
   varAmount++;
+  if(name == "true") addNumber(varAmount - 1, 1);
   return (varAmount - 1);
 }
 
 function getIndex(name){
-  if(name == "true" || name == "false"){
-    return(defineVar(name));
-  }
+  if(name == "true" || name == "false") return(defineVar(name));
   for(var i = 0; i < varAmount; i++){
     if(name == varNames[i]) return(i);
   }
@@ -395,6 +394,8 @@ function compile(){
 
       if(line.indexOf("==") > -1) operator = "==";
       if(line.indexOf("!=") > -1) operator = "!=";
+      if(line.indexOf("<") > -1) operator = "<";
+      if(line.indexOf(">") > -1) operator = ">";
 
       var var1 = line.substr(5).split(operator)[0];
       var var2 = line.split(operator)[1];
